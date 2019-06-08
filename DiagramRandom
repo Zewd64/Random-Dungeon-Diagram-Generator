@@ -1,0 +1,377 @@
+using System;
+
+namespace AAARandomDungeonGenerator
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello there, and welcome to the Sciamachy Dungeon Diagram Generator!");
+            Console.WriteLine("Let's start with the average level of your players' personae.");
+            Console.WriteLine("Go ahead and enter the average level of the party as a number and \npress enter. Decimal format, please!");
+            int rndCharLevel = AvgChar();
+            Console.WriteLine("Alright, thanks for that.");
+            Console.WriteLine("Now, on a scale of 1 to 10, how long do you want this to be? Just enter a number.");
+            Console.WriteLine("We're talking about 1 is a breeze for that level, but 10 is a ridiculous marathon.");
+            int dgnSize = DgnSz(rndCharLevel);
+            Console.WriteLine("Dearly noted.");
+            Console.WriteLine("What's involved in this dungeon? You've got the options of including \npuzzles, encounters, and hazards.");
+            Console.WriteLine("If you want any combination of the three, list the components out seperated \nby commas. For example, if you want puzzles and hazards, enter \"puzzles, hazards\"");
+            Console.WriteLine("To include all three components, enter \"balanced\" ");
+        Tag1:
+            string compList = Console.ReadLine();
+            compList.ToLower();
+            int hzd = CmpList1(compList);
+            if (hzd == 2)
+            {
+                goto Tag1;
+            }
+            bool hzdRef = RefList1(hzd);
+            int pzl = CmpList2(compList);
+            if (pzl == 2)
+            {
+                goto Tag1;
+            }
+            bool pzlRef = RefList2(pzl);
+            int ect = CmpList3(compList);
+            if (ect == 2)
+            {
+                goto Tag1;
+            }
+            bool ectRef = RefList3(ect);
+            if (ectRef == true)
+            {
+                goto Tag2;
+            }
+            else
+            {
+                goto Tag3;
+            }
+        Tag2:
+            int ectType = EctGen();
+        Tag3:
+            Console.WriteLine("Alright, here's your diagram schematic:");
+            int lineNum = LineGen(dgnSize);
+
+        }
+        static Int32 AvgChar()
+        {
+        TagA:
+            try
+            {
+                string avgCharLevel = Console.ReadLine();
+                decimal num = Convert.ToDecimal(avgCharLevel);
+                Math.Round(num);
+                int rndCharLevel = Convert.ToInt32(num);
+                return rndCharLevel;
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Your choice is incorrectly formatted. Ensure\nthat you are entering a number");
+                goto TagA;
+            }
+
+        }
+        static int DgnSz(int rndCharLevel)
+        {
+        TagB:
+            try
+            {
+                string temp = Console.ReadLine();
+                int dgnScale = Convert.ToInt32(temp);
+                int dgnSize = (dgnScale * rndCharLevel);
+                return dgnSize;
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Your choice is incorrectly formatted. Ensure\nthat you are entering a number");
+                goto TagB;
+            }
+
+        }
+        static int CmpList1(string compList)
+        {
+            switch (compList)
+            {
+                case "hazards":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                case "puzzles":
+                    {
+                        int hzd = 0;
+                        return hzd;
+                    }
+                case "encounters":
+                    {
+                        int hzd = 0;
+                        return hzd;
+                    }
+                case "puzzles, encounters":
+                    {
+                        int hzd = 0;
+                        return hzd;
+                    }
+                case "encounters, puzzles":
+                    {
+                        int hzd = 0;
+                        return hzd;
+                    }
+                case "encounters, hazards":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                case "hazards, encounters":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                case "hazards, puzzles":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                case "puzzles, hazards":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                case "balanced":
+                    {
+                        int hzd = 1;
+                        return hzd;
+                    }
+                default:
+                    Console.WriteLine("Your choice is incorrectly formatted. Please check spelling and make sure to use \n\"balanced\" if you're selecting all three options instead of listing them out.");
+                    int errorOccured = 2;
+                    return errorOccured;
+            }
+
+        }
+        static bool RefList1(int hzd)
+        {
+            switch (hzd)
+            {
+                case 0:
+                    {
+                        bool refHzd = false;
+                        return refHzd;
+                    }
+                case 1:
+                    {
+                        bool refHzd = true;
+                        return refHzd;
+                    }
+                default:
+                    {
+                        bool refHzd = false;
+                        return refHzd;
+                    }
+            }
+        }
+        static int CmpList2(string compList)
+        {
+            switch (compList)
+            {
+                case "hazards":
+                    {
+                        int pzl = 0;
+                        return pzl;
+                    }
+                case "puzzles":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                case "encounters":
+                    {
+                        int pzl = 0;
+                        return pzl;
+                    }
+                case "puzzles, encounters":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                case "encounters, puzzles":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                case "encounters, hazards":
+                    {
+                        int pzl = 0;
+                        return pzl;
+                    }
+                case "hazards, encounters":
+                    {
+                        int pzl = 0;
+                        return pzl;
+                    }
+                case "hazards, puzzles":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                case "puzzles, hazards":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                case "balanced":
+                    {
+                        int pzl = 1;
+                        return pzl;
+                    }
+                default:
+                    Console.WriteLine("Your choice is incorrectly formatted. Please check spelling and make sure to use \n\"balanced\" if you're selecting all three options instead of listing them out..");
+                    int errorOccured = 2;
+                    return errorOccured;
+            }
+
+        }
+        static bool RefList2(int pzl)
+        {
+            switch (pzl)
+            {
+                case 0:
+                    {
+                        bool refPzl = false;
+                        return refPzl;
+                    }
+                case 1:
+                    {
+                        bool refPzl = true;
+                        return refPzl;
+                    }
+                default:
+                    {
+                        bool refPzl = false;
+                        return refPzl;
+                    }
+            }
+        }
+        static int CmpList3(string compList)
+        {
+            switch (compList)
+            {
+                case "hazards":
+                    {
+                        int ect = 0;
+                        return ect;
+                    }
+                case "puzzles":
+                    {
+                        int ect = 0;
+                        return ect;
+                    }
+                case "encounters":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                case "puzzles, encounters":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                case "encounters, puzzles":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                case "encounters, hazards":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                case "hazards, encounters":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                case "hazards, puzzles":
+                    {
+                        int ect = 0;
+                        return ect;
+                    }
+                case "puzzles, hazards":
+                    {
+                        int ect = 0;
+                        return ect;
+                    }
+                case "balanced":
+                    {
+                        int ect = 1;
+                        return ect;
+                    }
+                default:
+                    Console.WriteLine("Your choice is incorrectly formatted. Please check spelling and make sure to use \n\"balanced\" if you're selecting all three options instead of listing them out.");
+                    int errorOccured = 2;
+                    return errorOccured;
+            }
+
+        }
+        static bool RefList3(int ect)
+        {
+            switch (ect)
+            {
+                case 0:
+                    {
+                        bool refEct = false;
+                        return refEct;
+                    }
+                case 1:
+                    {
+                        bool refEct = true;
+                        return refEct;
+                    }
+                default:
+                    {
+                        bool refEct = false;
+                        return refEct;
+                    }
+            }
+        }
+        static int EctGen()
+        {
+            Console.WriteLine("Very good.");
+            Console.WriteLine("Would you prefer this dungeon to involve\ncombat or confrontations?");
+            TagEnc:
+            Console.WriteLine("Enter \"combat\", \"confrontation\", or \"both\".");
+            string ectType = Console.ReadLine();
+            ectType.ToLower();
+            switch (ectType)
+            {
+                case "combat":
+                    {
+                        int isCom = 1;
+                        return isCom;
+                    }
+                case "confrontation":
+                    {
+                        int isCom = 0;
+                        return isCom;
+                    }
+                case "both":
+                    {
+                        int isCom = 2;
+                        return isCom;
+                    }
+                default:
+                    {
+                        Console.WriteLine("Your choice is incorrectly formatted. Please check spelling and make sure to use \n\"both\" if you're selecting both options instead of listing them out.");
+                        goto TagEnc;
+                    }
+            }
+        }
+        static int LineGen(int dgnSize) {
+            Random lineNumber = new Random();
+            int lineNum = lineNumber.Next(1, dgnSize);
+            return lineNum;
+        }
+
+    }
+}
