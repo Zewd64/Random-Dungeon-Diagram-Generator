@@ -52,7 +52,29 @@ namespace AAARandomDungeonGenerator
         Tag3:
             Console.WriteLine("Alright, here's your diagram schematic:");
             int lineNum = LineGen(dgnSize);
-
+            int obstRem = dgnSize - lineNum;
+            int runID = 0;
+            int[] takenLines = new int[lineNum];
+            while (obstRem > 0)
+            {
+                int aLine = LineSelector(lineNum, takenLines, runID);
+                int aSize = SubTaskGen(obstRem);
+                string aName = ("subtask" + aLine);
+                obstRem = obstRem - aSize;
+                var standIn  = new SubTask(aName, aSize, aLine, runID);
+                runID++;
+            }
+            obstRem = dgnSize;
+            int i = 0;
+            int[] takenSubTasks = new int[obstRem];
+            while (obstRem > 0)
+            {
+                int aLine = ThirdSelector(runID, takenSubTasks, i);
+                int aSize = ThirdTaskGen(obstRem);
+                string aName = ("thirdtask" + aLine);
+                obstRem = obstRem - aSize;
+                var thirdtask = new ThirdTask(aName, aLine, aSize);
+            }
         }
         static Int32 AvgChar()
         {
@@ -65,7 +87,7 @@ namespace AAARandomDungeonGenerator
                 int rndCharLevel = Convert.ToInt32(num);
                 return rndCharLevel;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Console.WriteLine("Your choice is incorrectly formatted. Ensure\nthat you are entering a number");
                 goto TagA;
@@ -82,7 +104,7 @@ namespace AAARandomDungeonGenerator
                 int dgnSize = (dgnScale * rndCharLevel);
                 return dgnSize;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Console.WriteLine("Your choice is incorrectly formatted. Ensure\nthat you are entering a number");
                 goto TagB;
@@ -339,7 +361,7 @@ namespace AAARandomDungeonGenerator
         {
             Console.WriteLine("Very good.");
             Console.WriteLine("Would you prefer this dungeon to involve\ncombat or confrontations?");
-            TagEnc:
+        TagEnc:
             Console.WriteLine("Enter \"combat\", \"confrontation\", or \"both\".");
             string ectType = Console.ReadLine();
             ectType.ToLower();
@@ -367,11 +389,55 @@ namespace AAARandomDungeonGenerator
                     }
             }
         }
-        static int LineGen(int dgnSize) {
+        static int LineGen(int dgnSize)
+        {
             Random lineNumber = new Random();
             int lineNum = lineNumber.Next(1, dgnSize);
             return lineNum;
         }
+        static int LineSelector(int lineNum, int[] takenLines, int runID)
+        {
+        TagC:
+            Random lineNumbSelect = new Random();
+            int aLine = lineNumbSelect.Next(0, lineNum++);
 
+            foreach (int takenLine in takenLines)
+            {
+                if (takenLine == aLine)
+                {
+                    goto TagC;
+                }
+            }
+            takenLines[runID] = aLine;
+            return aLine;
+        }
+        static int SubTaskGen(int obstRem)
+        {
+            Random subTaskSize = new Random();
+            int aSize = subTaskSize.Next(0, obstRem++);
+            return aSize;
+        }
+        static int ThirdSelector(int runID, int[] takenSubTasks, int i)
+        {
+        TagD:
+            Random thirdTaskSize = new Random();
+            int aLine = thirdTaskSize.Next(0, runID++);
+
+            foreach (int takenLine in takenSubTasks)
+            {
+                if (takenLine == aLine)
+                {
+                    goto TagD;
+                }
+            }
+            takenSubTasks[i] = aLine;
+            return aLine;
+        }
+        static int ThirdTaskGen(int obstRem)
+        {
+            Random thirdTaskSize = new Random();
+            int aSize = thirdTaskSize.Next(0, obstRem++);
+            return aSize;
+        }
     }
 }
