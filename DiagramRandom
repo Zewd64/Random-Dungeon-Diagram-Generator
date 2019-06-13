@@ -52,29 +52,56 @@ namespace AAARandomDungeonGenerator
         Tag3:
             Console.WriteLine("Alright, here's your diagram schematic:");
             int lineNum = LineGen(dgnSize);
+            Console.WriteLine(lineNum);
+            int[] takenLines = new int[lineNum];
+            Console.WriteLine(takenLines.Length);
             int obstRem = dgnSize - lineNum;
             int runID = 0;
-            int[] takenLines = new int[lineNum];
+            System.Collections.Generic.List<int[]> subTasks = new System.Collections.Generic.List<int[]>();
             while (obstRem > 0)
             {
                 int aLine = LineSelector(lineNum, takenLines, runID);
                 int aSize = SubTaskGen(obstRem);
                 string aName = ("subtask" + aLine);
                 obstRem = obstRem - aSize;
-                var standIn  = new SubTask(aName, aSize, aLine, runID);
+                int[] standIn  = new int[] { aSize, aLine, runID };
+                subTasks.Add(standIn);
                 runID++;
             }
             obstRem = dgnSize;
             int i = 0;
             int[] takenSubTasks = new int[obstRem];
+            System.Collections.Generic.List<int[]> thirdTasks = new System.Collections.Generic.List<int[]>();
             while (obstRem > 0)
             {
                 int aLine = ThirdSelector(runID, takenSubTasks, i);
                 int aSize = ThirdTaskGen(obstRem);
                 string aName = ("thirdtask" + aLine);
                 obstRem = obstRem - aSize;
-                var thirdtask = new ThirdTask(aName, aLine, aSize);
+                int[] thirdArray = new int[] { aLine, aSize, i };
+                thirdTasks.Add(thirdArray);
+                i++;
             }
+            int runPrime = runID;
+            int iPrime = i;
+            int[,,] basicTemplate = new int[runID, i, 2];
+            while (runPrime > 0)
+            {
+                int[] subTemp1 = subTasks[runPrime];
+                basicTemplate[runPrime, 0, 0] = subTemp1[0];
+                basicTemplate[runPrime, 0, 1] = subTemp1[1];
+                basicTemplate[runPrime, 0, 2] = subTemp1[2];
+                runPrime--;
+            }
+            while (i > 0)
+            {
+                int[] thirdTemp = thirdTasks[i];
+                basicTemplate[0, i, 0] = thirdTemp[0];
+                basicTemplate[0, i, 1] = thirdTemp[1];
+                basicTemplate[0, i, 2] = thirdTemp[2];
+                iPrime--;
+            }
+            Console.WriteLine(basicTemplate);
         }
         static Int32 AvgChar()
         {
@@ -400,7 +427,6 @@ namespace AAARandomDungeonGenerator
         TagC:
             Random lineNumbSelect = new Random();
             int aLine = lineNumbSelect.Next(0, lineNum++);
-
             foreach (int takenLine in takenLines)
             {
                 if (takenLine == aLine)
