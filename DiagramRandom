@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Generic;
 namespace AAARandomDungeonGenerator
 {
     class Program
@@ -50,58 +50,61 @@ namespace AAARandomDungeonGenerator
         Tag2:
             int ectType = EctGen();
         Tag3:
-            Console.WriteLine("Alright, here's your diagram schematic:");
+            Console.WriteLine("Determining verticality...");
             int lineNum = LineGen(dgnSize);
-            Console.WriteLine(lineNum);
-            int[] takenLines = new int[lineNum];
-            Console.WriteLine(takenLines.Length);
+            Console.WriteLine("LineNum Complete");
+            int[] takenLines = new int[lineNum+1];
+            Console.WriteLine("TakenLines Complete");
             int obstRem = dgnSize - lineNum;
             int runID = 0;
-            System.Collections.Generic.List<int[]> subTasks = new System.Collections.Generic.List<int[]>();
+            List<int[]> subTasks = new List<int[]>();
             while (obstRem > 0)
             {
                 int aLine = LineSelector(lineNum, takenLines, runID);
                 int aSize = SubTaskGen(obstRem);
-                string aName = ("subtask" + aLine);
                 obstRem = obstRem - aSize;
-                int[] standIn  = new int[] { aSize, aLine, runID };
+                int[] standIn = new int[] { aLine, aSize };
                 subTasks.Add(standIn);
                 runID++;
             }
+            Console.WriteLine("Determining width...");
             obstRem = dgnSize;
             int i = 0;
             int[] takenSubTasks = new int[obstRem];
-            System.Collections.Generic.List<int[]> thirdTasks = new System.Collections.Generic.List<int[]>();
+            List<int[]> thirdTasks = new List<int[]>();
             while (obstRem > 0)
             {
                 int aLine = ThirdSelector(runID, takenSubTasks, i);
+                if (aLine == 6000)
+                {
+                    goto TagE;
+                }
+                int targetSubSize = SubSizeGen(aLine, subTasks);
+                int aSubTask = SubTaskSelector(targetSubSize);
                 int aSize = ThirdTaskGen(obstRem);
-                string aName = ("thirdtask" + aLine);
                 obstRem = obstRem - aSize;
-                int[] thirdArray = new int[] { aLine, aSize, i };
+                int[] thirdArray = new int[] { aLine, aSubTask, aSize };
                 thirdTasks.Add(thirdArray);
                 i++;
             }
-            int runPrime = runID;
-            int iPrime = i;
-            int[,,] basicTemplate = new int[runID, i, 2];
-            while (runPrime > 0)
+        TagE:
+            Console.WriteLine("Generating basic template...");
+            int[] widthFinder = new int[lineNum + 1];
+            int widthIter = lineNum;
+            int maxWidth = MaxWidthHandler(subTasks, widthIter, widthFinder);
+            int[,] basicTemplate = new int[lineNum, maxWidth];
+            foreach (var subtask in subTasks)
             {
-                int[] subTemp1 = subTasks[runPrime];
-                basicTemplate[runPrime, 0, 0] = subTemp1[0];
-                basicTemplate[runPrime, 0, 1] = subTemp1[1];
-                basicTemplate[runPrime, 0, 2] = subTemp1[2];
-                runPrime--;
+                Console.WriteLine("Check");
+                basicTemplate[subtask[0], 0] = subtask[1];
             }
-            while (i > 0)
+            foreach (var thirdtask in thirdTasks)
             {
-                int[] thirdTemp = thirdTasks[i];
-                basicTemplate[0, i, 0] = thirdTemp[0];
-                basicTemplate[0, i, 1] = thirdTemp[1];
-                basicTemplate[0, i, 2] = thirdTemp[2];
-                iPrime--;
+                Console.WriteLine("Affirmative");
+                basicTemplate[thirdtask[0], thirdtask[1]] = thirdtask[2];
             }
-            Console.WriteLine(basicTemplate);
+            int[,] adjTemplate = MainLineHandler(basicTemplate, lineNum);
+            int[,] finalTemplate = SubLineHandler(adjTemplate, lineNum, maxWidth);
         }
         static Int32 AvgChar()
         {
@@ -426,44 +429,137 @@ namespace AAARandomDungeonGenerator
         {
         TagC:
             Random lineNumbSelect = new Random();
-            int aLine = lineNumbSelect.Next(0, lineNum++);
+            int aLine = lineNumbSelect.Next(0, lineNum);
             foreach (int takenLine in takenLines)
             {
+                Console.WriteLine("Check Complete");
                 if (takenLine == aLine)
                 {
+                    if (takenLine == 0)
+                    {
+                        goto TagD;
+                    }
                     goto TagC;
                 }
             }
+            TagD:
             takenLines[runID] = aLine;
             return aLine;
         }
         static int SubTaskGen(int obstRem)
         {
             Random subTaskSize = new Random();
-            int aSize = subTaskSize.Next(0, obstRem++);
+            int aSize = subTaskSize.Next(0, obstRem + 1);
             return aSize;
         }
         static int ThirdSelector(int runID, int[] takenSubTasks, int i)
         {
+            int iter = 0;
         TagD:
             Random thirdTaskSize = new Random();
-            int aLine = thirdTaskSize.Next(0, runID++);
-
+            int aLine = thirdTaskSize.Next(0, runID + 1);
             foreach (int takenLine in takenSubTasks)
             {
                 if (takenLine == aLine)
                 {
+                    iter = iter + 1;
                     goto TagD;
+                }
+                else if (iter > 50000)
+                {
+                    return 6000;
                 }
             }
             takenSubTasks[i] = aLine;
             return aLine;
         }
+        static int SubSizeGen(int aLine, List<int[]> subTasks)
+        {
+            foreach (var sizetask in subTasks)
+            {
+                if (sizetask[1] == aLine)
+                {
+                    int targetSubSize = sizetask[0];
+                    return targetSubSize;
+                }
+            }
+            return 0;
+        }
+        static int SubTaskSelector(int targetSubSize)
+        {
+            Random subTaskPlacement = new Random();
+            int aSubTask = subTaskPlacement.Next(1, targetSubSize + 1);
+            return aSubTask;
+        }
         static int ThirdTaskGen(int obstRem)
         {
             Random thirdTaskSize = new Random();
-            int aSize = thirdTaskSize.Next(0, obstRem++);
+            int aSize = thirdTaskSize.Next(0, obstRem + 1);
             return aSize;
+        }
+        static int MaxWidthHandler(List<int[]> subTasks, int widthIter, int[] widthFinder)
+        {
+            subTasks.ForEach(delegate (int[] subTask)
+            {
+                while (widthIter >= 0)
+                {
+                    widthFinder[widthIter] = subTask[0];
+                    widthIter = widthIter - 1;
+                }
+            });
+            Array.Sort(widthFinder);
+            Array.Reverse(widthFinder);
+            int widthVar = widthFinder[0];
+            return widthVar;
+        }
+        static int[,] MainLineHandler(int[,] basicTemplate, int lineNum)
+        {
+            for(int x = 0; x < lineNum+1; x++)
+            {
+                if (basicTemplate[x-1,0] == 0)
+                {
+                    basicTemplate[x-1, 0] = 0;
+                }
+            }
+            return basicTemplate;
+        }
+        static int[,] SubLineHandler(int[,] adjTemplate, int lineNum, int maxWidth)
+        {
+            for (int y = 0; y < lineNum+1; y++)
+            {
+                Tag:
+                int[] tempArr = new int[maxWidth];
+                for (int x = 0; x < maxWidth+1; x++)
+                {
+                    tempArr[x] = adjTemplate[y-1, x-1];
+                }
+                int zeroIndex = FinalZero(tempArr, maxWidth);
+                foreach (int z in adjTemplate)
+                {
+                    if (z > zeroIndex)
+                    {
+                        y = y + 1;
+                        goto Tag;
+                    }
+                    else if (adjTemplate[y-1,z-1] == 0)
+                    {
+                        adjTemplate[y-1,z-1] = 1;
+                    }
+                }
+            }
+            return adjTemplate;
+        }
+        static int FinalZero(int[] tempArr,int maxWidth)
+        {
+            for (int i = tempArr.Length; i > 0; i--)
+            {
+                if (i == 0)
+                {
+                    continue;
+                }
+                return i;
+            }
+            return maxWidth;
         }
     }
 }
